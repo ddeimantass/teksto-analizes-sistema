@@ -1,0 +1,134 @@
+<?php
+
+class TemplateModel extends CI_Model {
+
+	public function getAllTemplates() {
+        $query = $this->db->get('template');
+        $templates = array();
+        foreach ($query->result() as $row)
+        {
+            $templates[$row->id] = $row;
+        }
+        return $templates;
+	}
+    public function getAllPortals() {
+        $query = $this->db->get('portal');
+        $portals = array();
+        foreach ($query->result() as $row)
+        {
+            $portals[$row->name] = $row;
+        }
+        return $portals;
+    }
+    public function getPortalByName($name) {
+        $this->db->where('name',$name);
+        $query = $this->db->get('portal');
+        foreach ($query->result() as $row)
+        {
+            return $row;
+        }
+    }
+    public function getDelfiTemplate() {
+        $query = $this->db->query('SELECT template.* FROM template LEFT JOIN portal ON portal.id = template.portal_id WHERE portal.name = "delfi"');
+        foreach ($query->result() as $row)
+        {
+            return $row;
+        }
+    }
+    public function saveArticles($articles){
+        $categories = $authors = $sources = array();
+        foreach($articles as $id => $article){
+            $categories[$article["category"]] = $article["category"];
+            if(isset($article["author"])){
+                $authors[$article["author"]] = $article["author"];
+            }
+            if(isset($article["source"])){
+                $sources[$article["source"]] = $article["source"];
+            }
+        }
+        $this->saveCategories($categories, end($articles)["portal_id"]);
+        $this->saveAuthors($authors);
+        $this->saveSources($sources);
+        $categories = $this->getCategories();
+        $authors = $this->getAuthors();
+        $sources = $this->getSources();
+        $DBarticles = $this->getArticles();
+        foreach($articles as $id => $article){
+
+            $articles[$id]["author_id"] = isset($articles[$id]["author"]) ? $authors[$articles[$id]["author"]] : null;
+            unset($articles[$id]["author"]);
+            $articles[$id]["source_id"] = isset($articles[$id]["source"]) ? $sources[$articles[$id]["source"]] : null;
+            unset($articles[$id]["source"]);
+            $articles[$id]["category_id"] = $categories[$articles[$id]["category"]];
+            unset($articles[$id]["category"]);
+
+            if(!isset($DBarticles[$id])) {
+                $this->db->insert('article', $articles[$id]);
+            }
+            else if(!isset($DBarticles[$id]->content)){
+                $this->db->replace('article', $articles[$id]);
+            }
+        }
+    }
+    public function getArticles() {
+        $query = $this->db->get('article');
+        $articles = array();
+        foreach ($query->result() as $row)
+        {
+            $articles[$row->id] = $row;
+        }
+        return $articles;
+    }
+    public function saveCategories($categories, $portal_id){
+        $DBcategories = $this->getCategories();
+        foreach($categories as $category){
+            if(!array_key_exists($category, $DBcategories)){
+                $this->db->insert('category', array("name" => $category, "portal_id" => $portal_id));
+            }
+        }
+    }
+    public function getCategories(){
+        $query = $this->db->get('category');
+        $categories = array();
+        foreach ($query->result() as $row)
+        {
+            $categories[$row->name] = $row->id;
+        }
+        return $categories;
+    }
+    public function saveAuthors($authors){
+        $DBauthors = $this->getAuthors();
+        foreach($authors as $author){
+            if(!array_key_exists($author, $DBauthors)){
+                $this->db->insert('author', array("name" => $author));
+            }
+        }
+
+    }
+    public function getAuthors(){
+        $query = $this->db->get('author');
+        $authors = array();
+        foreach ($query->result() as $row)
+        {
+            $authors[$row->name] = $row->id;
+        }
+        return $authors;
+    }
+    public function saveSources($sources){
+        $DBsources = $this->getAuthors();
+        foreach($sources as $source){
+            if(!array_key_exists($source, $DBsources)){
+                $this->db->insert('source', array("name" => $source));
+            }
+        }
+    }
+    public function getSources(){
+        $query = $this->db->get('source');
+        $sources = array();
+        foreach ($query->result() as $row)
+        {
+            $sources[$row->name] = $row->id;
+        }
+        return $sources;
+    }
+}
