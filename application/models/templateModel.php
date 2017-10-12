@@ -35,6 +35,17 @@ class TemplateModel extends CI_Model {
             return $row;
         }
     }
+    public function saveComments($comments){
+        $DBcomments = $this->getComments();
+        foreach($comments as $id => $comment){
+            if(!isset($DBcomments[$id])) {
+                $this->db->insert('comment', $comments[$id]);
+            }
+            else if(!isset($DBcomments[$id]->content)){
+                $this->db->replace('comment', $comments[$id]);
+            }
+        }
+    }
     public function saveArticles($articles){
         $categories = $authors = $sources = array();
         foreach($articles as $id => $article){
@@ -54,7 +65,6 @@ class TemplateModel extends CI_Model {
         $sources = $this->getSources();
         $DBarticles = $this->getArticles();
         foreach($articles as $id => $article){
-
             $articles[$id]["author_id"] = isset($articles[$id]["author"]) ? $authors[$articles[$id]["author"]] : null;
             unset($articles[$id]["author"]);
             $articles[$id]["source_id"] = isset($articles[$id]["source"]) ? $sources[$articles[$id]["source"]] : null;
@@ -78,6 +88,15 @@ class TemplateModel extends CI_Model {
             $articles[$row->id] = $row;
         }
         return $articles;
+    }
+    public function getComments() {
+        $query = $this->db->get('comment');
+        $comments = array();
+        foreach ($query->result() as $row)
+        {
+            $comments[$row->id] = $row;
+        }
+        return $comments;
     }
     public function saveCategories($categories, $portal_id){
         $DBcategories = $this->getCategories();
