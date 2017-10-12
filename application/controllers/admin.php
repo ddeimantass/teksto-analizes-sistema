@@ -73,6 +73,7 @@ class Admin extends CI_Controller {
         $portal = $this->templateModel->getPortalByName("delfi");
         include APPPATH . 'third_party/simple_html_dom.php';
         $archive = file_get_html($portal->archive.'fromd='.date("d-m-Y", strtotime(date("d-m-Y") . " - 365 day")).'&tod='.date("d-m-Y").'&channel=0&category=0');
+        //$archive = file_get_html($portal->archive.'fromd=02.09.2017&tod=02.09.2017&channel=0&category=0');
         $articles = $comments = array();
         foreach($archive->find($template->article_headline) as $article_headline) {
             foreach($article_headline->find($template->article_link) as $link){
@@ -87,14 +88,9 @@ class Admin extends CI_Controller {
             $articles[$id]['image_url'] = $article_headline->find($template->image, 0)->src;
             $articles[$id]['summary'] = $article_headline->find($template->summary, 0)->innertext;
 
-            $shares = $article_headline->find($template->fb_share, 0);
-            $articles[$id]['comment_fb'] = isset($shares) ? $shares->innertext : 0;
-
             $comment_link = $article_headline->find($template->comment_link, 0);
             if(isset($comment_link)){
                 $articles[$id]['comment_link'] = $comment_link->href;
-                preg_match('#\((.*?)\)#', $comment_link->innertext, $match);
-                $articles[$id]['comment_count'] = $match[1];
             }
 
 
@@ -123,50 +119,66 @@ class Admin extends CI_Controller {
             $article_html->clear();
             unset($article_html);
             if(isset($articles[$id]['comment_link'])){
-                $comment_html = file_get_html($articles[$id]['link']."&com=1&no=0&s=2");
-                $comment_list = $comment_html->find($template->comment, 0);
-                foreach($comment_list->children() as $comment){
-                    if(isset($comment->attr['data-post-id'])) {
-                        $cid = $comment->attr['data-post-id'];
-                        $comments[$cid]["id"] = $cid;
-                        $comments[$cid]["article_id"] = $articles[$id]['id'];
-                        $comments[$cid]["portal_id"] = $articles[$id]['portal_id'];
-                        $dateIP = explode(" IP: ", $comment->find($template->comment_date, 0)->plaintext);
+                $counter = 0;
+                do {
+                    $comment_html = file_get_html($articles[$id]['link']."&com=1&reg=0&s=2&no=".$counter);
+                    $comment_list = $comment_html->find($template->comment, 0);
+                    $commentsArr = isset($comment_list) ? $comment_list->children() : array();
+                    foreach ($commentsArr as $comment) {
+                        if (isset($comment->attr['data-post-id'])) {
+                            if($comment->attr['data-post-id']){
+                                $cid = $comment->attr['data-post-id'];
+                                $comments[$cid]["id"] = $cid;
+                                $comments[$cid]["article_id"] = $articles[$id]['id'];
+                                $comments[$cid]["portal_id"] = $articles[$id]['portal_id'];
+                                $dateIP = explode("IP:", $comment->find($template->comment_date, 0)->plaintext);
+                                $d = DateTime::createFromFormat('Y-m-d H:i', trim($dateIP[0]));
+                                $comments[$cid]["date"] = $d->format('Y-m-d H:i:s');
+                                $comments[$cid]["ip"] = isset($dateIP[1]) ? trim($dateIP[1]) : '';
+                                $likes = $comment->find($template->comment_likes, 0);
+                                $comments[$cid]["likes"] = isset($likes) ? $likes : 0;
+                                $dislikes = $comment->find($template->comment_dislikes, 0);
+                                $comments[$cid]["dislikes"] = isset($dislikes) ? $dislikes : 0;
 
-                        $d = DateTime::createFromFormat('Y-m-d H:i', trim($dateIP[0]));
-                        $comments[$cid]["date"] = $d->format('Y-m-d H:i:s');
-                        $comments[$cid]["ip"] = isset($dateIP[1]) ? trim($dateIP[1]) : '';
-                        $likes = $comment->find($template->comment_likes, 0);
-                        $comments[$cid]["likes"] = isset($likes) ? $likes : 0;
-                        $dislikes = $comment->find($template->comment_dislikes, 0);
-                        $comments[$cid]["dislikes"] = isset($dislikes) ? $dislikes : 0;
-
-                        $comments[$cid]["content"] = $comment->find($template->comment_content, 0)->plaintext;
+                                $comments[$cid]["content"] = $comment->find($template->comment_content, 0)->plaintext;
+                            }
+                            $counter++;
+                        }
                     }
+                    $comment_html->clear();
+                    unset($comment_html);
                 }
-                $comment_html->clear();
-                unset($comment_html);
+                while($counter % 20 == 0 && $counter != 0);
+                $counter = 0;
+                do {
+                    $comment_html = file_get_html($articles[$id]['link']."&com=1&s=2&no=".$counter);
+                    $comment_list = $comment_html->find($template->comment, 0);
+                    $commentsArr = isset($comment_list) ? $comment_list->children() : array();
+                    foreach ($commentsArr as $comment) {
+                        if (isset($comment->attr['data-post-id'])) {
+                            if($comment->attr['data-post-id']) {
+                                $cid = $comment->attr['data-post-id'];
+                                $comments[$cid]["id"] = $cid;
+                                $comments[$cid]["article_id"] = $articles[$id]['id'];
+                                $comments[$cid]["portal_id"] = $articles[$id]['portal_id'];
+                                $dateIP = explode("IP:", $comment->find($template->comment_date, 0)->plaintext);
+                                $d = DateTime::createFromFormat('Y-m-d H:i', trim($dateIP[0]));
+                                $comments[$cid]["date"] = $d->format('Y-m-d H:i:s');
+                                $comments[$cid]["ip"] = isset($dateIP[1]) ? trim($dateIP[1]) : '';
+                                $likes = $comment->find($template->comment_likes, 0);
+                                $comments[$cid]["likes"] = isset($likes) ? $likes->plaintext : 0;
+                                $dislikes = $comment->find($template->comment_dislikes, 0);
+                                $comments[$cid]["dislikes"] = isset($dislikes) ? $dislikes->plaintext : 0;
 
-                $comment_html = file_get_html($articles[$id]['link']."&com=1&reg=0&no=0&s=2");
-                $comment_list = $comment_html->find($template->comment, 0);
-                foreach($comment_list->children() as $comment){
-                    if(isset($comment->attr['data-post-id'])) {
-                        $cid = $comment->attr['data-post-id'];
-                        $comments[$cid]["id"] = $cid;
-                        $comments[$cid]["article_id"] = $articles[$id]['id'];
-                        $comments[$cid]["portal_id"] = $articles[$id]['portal_id'];
-                        $dateIP = explode("IP:", $comment->find($template->comment_date, 0)->plaintext);
-                        $d = DateTime::createFromFormat('Y-m-d H:i', trim($dateIP[0]));
-                        $comments[$cid]["date"] = $d->format('Y-m-d H:i:s');
-                        $comments[$cid]["ip"] = isset($dateIP[1]) ? trim($dateIP[1]) : '';
-                        $likes = $comment->find($template->comment_likes, 0);
-                        $comments[$cid]["likes"] = isset($likes) ? $likes->plaintext : 0;
-                        $dislikes = $comment->find($template->comment_dislikes, 0);
-                        $comments[$cid]["dislikes"] = isset($dislikes) ? $dislikes->plaintext : 0;
-
-                        $comments[$cid]["content"] = $comment->find($template->comment_content, 0)->plaintext;
+                                $comments[$cid]["content"] = $comment->find($template->comment_content, 0)->plaintext;
+                            }
+                            $counter++;
+                        }
                     }
+                    $comment_html->clear();
+                    unset($comment_html);
                 }
+                while($counter % 20 == 0 && $counter != 0);
                 $this->templateModel->saveComments($comments);
             }
             $this->templateModel->saveArticles($articles);

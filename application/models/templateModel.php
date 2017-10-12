@@ -134,7 +134,7 @@ class TemplateModel extends CI_Model {
         return $authors;
     }
     public function saveSources($sources){
-        $DBsources = $this->getAuthors();
+        $DBsources = $this->getSources();
         foreach($sources as $source){
             if(!array_key_exists($source, $DBsources)){
                 $this->db->insert('source', array("name" => $source));
