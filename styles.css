@@ -1,7 +1,28 @@
 a.sidebar-toggle{
     display: none;
 }
-
+a.back{
+    font-size: 25px;
+    color: #000000;
+    margin-right: 15px;
+}
+p.mainTitle{
+    text-align: center;
+    font-size: 30px;
+    text-transform: capitalize;
+}
+div.portal{
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background: #ffffff;
+    height: 200px;
+    max-width: 200px;
+    max-height: 200px;
+}
+img.portalImg{
+    max-width: 200px;
+}
 @media screen and (max-width: 767px) {
     a.sidebar-toggle{
         display: block;

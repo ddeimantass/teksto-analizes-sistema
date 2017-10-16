@@ -11,12 +11,30 @@ class TemplateModel extends CI_Model {
         }
         return $templates;
 	}
+    public function getActiveTemplateById($id) {
+        $this->db->where('portal_id',$id);
+        $this->db->where('status',1);
+        $query = $this->db->get('template');
+        foreach ($query->result() as $row)
+        {
+            return $row;
+        }
+    }
     public function getAllPortals() {
         $query = $this->db->get('portal');
         $portals = array();
         foreach ($query->result() as $row)
         {
             $portals[$row->name] = $row;
+        }
+        return $portals;
+    }
+    public function getPortals() {
+        $query = $this->db->get('portal');
+        $portals = array();
+        foreach ($query->result() as $row)
+        {
+            $portals[$row->id] = $row;
         }
         return $portals;
     }
@@ -60,8 +78,8 @@ class TemplateModel extends CI_Model {
         $this->saveCategories($categories, end($articles)["portal_id"]);
         $this->saveAuthors($authors);
         $this->saveSources($sources);
-        $categories = $this->getCategories();
-        $authors = $this->getAuthors();
+        $categories = $this->getCategoriesIdByName();
+        $authors = $this->getAuthorsIdByName();
         $sources = $this->getSources();
         $DBarticles = $this->getArticles();
         foreach($articles as $id => $article){
@@ -99,14 +117,14 @@ class TemplateModel extends CI_Model {
         return $comments;
     }
     public function saveCategories($categories, $portal_id){
-        $DBcategories = $this->getCategories();
+        $DBcategories = $this->getCategoriesIdByName();
         foreach($categories as $category){
             if(!array_key_exists($category, $DBcategories)){
                 $this->db->insert('category', array("name" => $category, "portal_id" => $portal_id));
             }
         }
     }
-    public function getCategories(){
+    public function getCategoriesIdByName(){
         $query = $this->db->get('category');
         $categories = array();
         foreach ($query->result() as $row)
@@ -115,8 +133,17 @@ class TemplateModel extends CI_Model {
         }
         return $categories;
     }
+    public function getCategories(){
+        $query = $this->db->get('category');
+        $categories = array();
+        foreach ($query->result() as $row)
+        {
+            $categories[$row->id] = $row;
+        }
+        return $categories;
+    }
     public function saveAuthors($authors){
-        $DBauthors = $this->getAuthors();
+        $DBauthors = $this->getAuthorsIdByName();
         foreach($authors as $author){
             if(!array_key_exists($author, $DBauthors)){
                 $this->db->insert('author', array("name" => $author));
@@ -124,12 +151,21 @@ class TemplateModel extends CI_Model {
         }
 
     }
-    public function getAuthors(){
+    public function getAuthorsIdByName(){
         $query = $this->db->get('author');
         $authors = array();
         foreach ($query->result() as $row)
         {
             $authors[$row->name] = $row->id;
+        }
+        return $authors;
+    }
+    public function getAuthors(){
+        $query = $this->db->get('author');
+        $authors = array();
+        foreach ($query->result() as $row)
+        {
+            $authors[$row->id] = $row;
         }
         return $authors;
     }
