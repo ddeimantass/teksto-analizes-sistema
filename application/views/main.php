@@ -6,35 +6,30 @@
     <?php if(isset($portal)){ ?>
         <section class="content">
             <div class="row">
-                <form class="form-horizontal">
+                <form class="form-horizontal" id="portal">
                     <p class="col-xs-12 mainTitle" ><a class="back" href="<?php echo base_url("admin/main"); ?>"><i class="fa fa-chevron-left" aria-hidden="true"></i></a><?php echo $portal->name; ?></p>
                     <?php foreach($portal as $key => $attr){
-                        if( $key == 'id'){continue;}
+                            if($key == 'id'){continue;}
                         ?>
                         <div class="col-xs-12 form-group">
                             <label for="<?php echo $key; ?>" class="col-sm-3 control-label" ><?php echo $key; ?></label>
                             <div class="col-sm-6" >
-                                <?php if($key == '2017-10-09 19:26:38'){ ?>
-                                    <input type="text" class="form-control" name="<?php echo $key; ?>" id="<?php echo $key; ?>" value="<?php echo $attr; ?>">
-                                <?php }else{ ?>
-                                    <input type="text" class="form-control" name="<?php echo $key; ?>" id="<?php echo $key; ?>" value="<?php echo $attr; ?>">
-                                <?php } ?>
+                                <input type="text" class="form-control" name="<?php echo $key; ?>" id="<?php echo $key; ?>" value="<?php echo $attr; ?>">
                             </div>
                         </div>
                     <?php } ?>
                     <?php foreach($template as $key => $attr){
-                            if( $key == 'id' || $key == 'portal_id'){continue;}
                         ?>
-                        <div class="col-xs-12 form-group">
-                            <label for="<?php echo $key; ?>" class="col-sm-3 control-label" ><?php echo $key; ?></label>
-                            <div class="col-sm-6" >
-                                <?php if($key == '2017-10-09 19:26:38'){ ?>
+                        <?php if($key == 'id' || $key == 'portal_id'){ ?>
+                            <input type="hidden" name="<?php echo $key; ?>" value="<?php echo $attr; ?>">
+                        <?php }else{ ?>
+                            <div class="col-xs-12 form-group">
+                                <label for="<?php echo $key; ?>" class="col-sm-3 control-label" ><?php echo $key; ?></label>
+                                <div class="col-sm-6" >
                                     <input type="text" class="form-control" name="<?php echo $key; ?>" id="<?php echo $key; ?>" value="<?php echo $attr; ?>">
-                                <?php }else{ ?>
-                                    <input type="text" class="form-control" name="<?php echo $key; ?>" id="<?php echo $key; ?>" value="<?php echo $attr; ?>">
-                                <?php } ?>
+                                </div>
                             </div>
-                        </div>
+                        <?php } ?>
                     <?php } ?>
                 </form>
             </div>
@@ -68,7 +63,7 @@
                     <div class="col-xs-12 col-sm-4 col-md-2">
                         <a class="portal" href="<?php echo base_url("admin/main?portal=".$portal->name); ?>">
                             <div class="portal">
-                                <img class="portalImg" src="<?php echo $portal->image; ?>" >
+                                <img class="portalImg" src="<?php echo $portal->logo; ?>" >
                             </div>
                         </a>
                     </div>
@@ -78,3 +73,10 @@
     <?php } ?>
 
 </div>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#portal input").change(function(){
+            $.post("<?php echo base_url('admin/main'); ?>", $('#portal').serialize())
+        });
+    });
+</script>

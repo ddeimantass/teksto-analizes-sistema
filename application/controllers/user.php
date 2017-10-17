@@ -29,7 +29,7 @@ class User extends CI_Controller {
                     'is_logged_in'=>1
                 );
                 $this->session->set_userdata($data);
-
+                session_write_close();
                 if($this->userModel->is_admin()) {
                     redirect('admin/main');
                 }
@@ -46,9 +46,41 @@ class User extends CI_Controller {
         }
     }
 
-    public function logout(){
+    public function logout()
+    {
         $this->session->sess_destroy();
         redirect('user/login');
+    }
+    public function change()
+    {
+        if($this->session->userdata('is_logged_in')) {
+            $this->load->library('form_validation');
+            $this->load->model('userModel');
+
+            $this->form_validation->set_rules('oldPassword', 'Current password', 'required|callback_validatePass|max_length[30]|md5|trim');
+            $this->form_validation->set_rules('password', 'New password', 'required|max_length[30]|md5|trim');
+            $this->form_validation->set_rules('cpassword', 'Retype new password', 'required|max_length[30]|md5|trim|matches[password]');
+
+            $this->form_validation->set_message('required', '%s field is required');
+            $this->form_validation->set_message('max_length', '%s maximum symbols count is %s');
+            $this->form_validation->set_message("matches", 'New passwords mismatch');
+
+            if ($this->form_validation->run()) {
+                $this->userModel->updatePassword();
+                $data['pass'] = "Your password has been successful updated";
+                $this->load->view("header");
+                $this->load->view("sideBar");
+                $this->load->view("change", $data);
+                $this->load->view("footer");
+            } else {
+                $data['passErr'] = validation_errors();
+                $this->load->view("header");
+                $this->load->view("sideBar");
+                $this->load->view("change", $data);
+                $this->load->view("footer");
+            }
+        }
+
     }
     public function register() {
         
@@ -149,6 +181,16 @@ class User extends CI_Controller {
         }
         else{
             $this->form_validation->set_message("validate_credentials", 'Wrong email or password');
+            return false;
+        }
+    }
+    public function validatePass($pass){
+
+        $this->load->model("userModel");
+        if($this->userModel->passwordExists($pass))
+            return true;
+        else{
+            $this->form_validation->set_message("validatePass", 'Entered wrong current password');
             return false;
         }
     }

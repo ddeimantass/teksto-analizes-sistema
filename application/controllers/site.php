@@ -4,12 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Site extends CI_Controller {
     
     public function index() {
-        if($this->session->userdata('role_id') == 1) {
-            redirect('admin/main');
-        }
-        else{
-            $this->news();
-        }
+        $this->news();
 	}
     public function news() {
         if($this->session->userdata('is_logged_in')){

@@ -11,6 +11,31 @@ class TemplateModel extends CI_Model {
         }
         return $templates;
 	}
+    public function updateTemplate($data) {
+        $this->load->library('form_validation');
+        foreach($data as $key => $value){
+            $this->form_validation->set_rules($key, $key,'trim|xss_clean|max_length[255]');
+        }
+
+        if($this->form_validation->run()){
+            unset($data["name"]);
+            unset($data["archive"]);
+            unset($data["logo"]);
+            unset($data["date_modified"]);
+            $this->db->replace('template', $data);
+        }
+    }
+    public function updatePortal($data) {
+        $this->load->library('form_validation');
+        foreach($data as $key => $value){
+            $this->form_validation->set_rules($key, $key,'trim|xss_clean|max_length[255]');
+        }
+
+        if($this->form_validation->run()){
+            $this->db->replace('portal', $data);
+        }
+    }
+
     public function getActiveTemplateById($id) {
         $this->db->where('portal_id',$id);
         $this->db->where('status',1);

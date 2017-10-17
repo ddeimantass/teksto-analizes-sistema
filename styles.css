@@ -11,6 +11,14 @@ p.mainTitle{
     font-size: 30px;
     text-transform: capitalize;
 }
+#change{
+    width: 400px;
+    margin: auto;
+}
+#change button{
+    width: 200px;
+    margin: auto;
+}
 div.portal{
     display: flex;
     align-items: center;

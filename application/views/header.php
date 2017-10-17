@@ -34,21 +34,21 @@
                 <ul class="nav navbar-nav">
                     <?php if($this->session->userdata('role_id') == 1){
                         echo '<li class="user">';
-                        if (strpos(base_url(uri_string()), 'site') !== false) {
-                            echo '<a href="'.base_url().'" ><i class="fa fa-exchange" aria-hidden="true"></i></a>';
+                        if (strpos(base_url(uri_string()), 'admin') !== false) {
+                            echo '<a href="'.base_url('site/news').'" ><i class="fa fa-exchange" aria-hidden="true"></i></a>';
                         }
                         else{
-                            echo '<a href="'.base_url().'site/news" ><i class="fa fa-exchange" aria-hidden="true"></i></a>';
+                            echo '<a href="'.base_url("admin/main").'" ><i class="fa fa-exchange" aria-hidden="true"></i></a>';
                         }
                         echo "</li>";
                     } ?>
                     <li class="user">
-                        <a>
+                        <a href="<?php echo base_url("user/change"); ?>">
                             <i class="fa fa-user"></i> <?php echo $this->session->userdata('name'); ?>
                         </a>
                     </li>
                     <li class="logout">
-                        <a href="<?php echo base_url()."user/logout"; ?>">
+                        <a href="<?php echo base_url("user/logout"); ?>">
                             <i class="fa fa-times"></i>
                         </a>
                     </li>

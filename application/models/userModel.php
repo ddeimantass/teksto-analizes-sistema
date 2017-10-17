@@ -17,6 +17,14 @@ class UserModel extends CI_Model {
         return $query->num_rows() > 0 ? true : false;
 
 	}
+    public function passwordExists($pass){
+
+        $this->db->where('password',md5($pass));
+        $query = $this->db->get('user');
+
+        return $query->num_rows() > 0 ? true : false;
+
+    }
 	public function can_log_in() {
 
 		$this->db->where('email',$this->input->post('email'));
@@ -40,8 +48,36 @@ class UserModel extends CI_Model {
 
         return $query ? true : false;
     }
-    public function getUsers() {
+    public function updatePassword()
+    {
+        $user = $this->getUserByEmail($this->session->userdata('email'));
+        $data = array(
+            'id' => $user->id,
+            'email' => $user->email,
+            'name' => $user->name,
+            'role_id' => $user->role_id,
+            'deleted' => $user->deleted,
+            'password' => $this->input->post('password'),
+        );
+
+        $query = $this->db->replace('user', $data);
+
+        return $query ? true : false;
+    }
+
+    public function getUsers()
+    {
         $query = $this->db->get('user');
+        return $query->result();
+    }
+    public function getUserByEmail($email)
+    {
+        $this->db->where('email', $email);
+        $query = $this->db->get('user');
+        foreach ($query->result() as $row)
+        {
+            return $row;
+        }
         return $query->result();
     }
     public function getRoleByEmail() {

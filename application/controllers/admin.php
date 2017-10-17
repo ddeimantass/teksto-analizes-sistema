@@ -6,16 +6,21 @@ class Admin extends CI_Controller
 
     public function main()
     {
-        if($this->session->userdata('is_logged_in') && $this->session->userdata('role_id') == 1){
-            //$this->load->library('delfi');
-            //$this->delfi->archive();
-
-            //$data['user_email']= $this->session->userdata('email');
+        if($this->session->userdata('is_logged_in') && $this->session->userdata('role_id') == 1)
+        {
 
             $this->load->model("templateModel");
+            if(isset($_POST) && !empty($_POST)){
+                $this->templateModel->updateTemplate($_POST);
+                $portalData = array("id" => $_POST["portal_id"], "name" => $_POST["name"], "logo" => $_POST["logo"], "archive" => $_POST["archive"]);
+                $this->templateModel->updatePortal($portalData);
+                die();
+            }
+
             $portals = $this->templateModel->getAllPortals();
 
             $portal = isset($_GET["portal"]) ? $_GET["portal"] : '';
+
             if(!empty($portal)){
                 if($portal == "cron"){
                     $this->load->model("cronModel");
