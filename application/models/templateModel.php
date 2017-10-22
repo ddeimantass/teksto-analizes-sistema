@@ -2,6 +2,12 @@
 
 class TemplateModel extends CI_Model {
 
+    public function addNewTemplate() {
+        $templates = $this->getAllTemplates();
+        $id = end($templates)->id;
+        $this->db->insert('template', array('id' => ($id+1)));
+    }
+
 	public function getAllTemplates() {
         $query = $this->db->get('template');
         $templates = array();

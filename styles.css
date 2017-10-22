@@ -19,7 +19,7 @@ p.mainTitle{
     width: 200px;
     margin: auto;
 }
-div.portal{
+div.portal, div.addMain, div.cron{
     display: flex;
     align-items: center;
     justify-content: space-around;
@@ -27,7 +27,24 @@ div.portal{
     height: 200px;
     max-width: 200px;
     max-height: 200px;
+    color: #000000;
+    font-size: 50px;
+    cursor: pointer;
 }
+div.addMain, div.cron{
+    flex-direction: column;
+}
+div.addMain p, div.cron p{
+    margin: 0;
+    text-align: center;
+    font-size: 40px;
+    line-height: 50px;
+}
+div.addMain i, div.cron i{
+    font-size: 80px;
+    margin-top: 10px;
+}
+
 img.portalImg{
     max-width: 200px;
 }

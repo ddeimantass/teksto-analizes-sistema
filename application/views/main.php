@@ -19,6 +19,7 @@
                         </div>
                     <?php } ?>
                     <?php foreach($template as $key => $attr){
+                            if($key == 'date_modified'){continue;}
                         ?>
                         <?php if($key == 'id' || $key == 'portal_id'){ ?>
                             <input type="hidden" name="<?php echo $key; ?>" value="<?php echo $attr; ?>">
@@ -39,13 +40,18 @@
         <section class="content">
             <div class="row">
                 <form class="form-horizontal">
+                    <p class="col-xs-12 mainTitle" ><a class="back" href="<?php echo base_url("admin/main"); ?>"><i class="fa fa-chevron-left" aria-hidden="true"></i></a><?php echo $cron->title; ?></p>
                     <?php foreach($cron as $key => $attr){ ?>
-                        <div class="col-xs-12 form-group">
-                            <label for="<?php echo $key; ?>" class="col-sm-3 control-label" ><?php echo $key; ?></label>
-                            <div class="col-sm-6">
-                                <input type="text" class="form-control" name="<?php echo $key; ?>" id="<?php echo $key; ?>" value="<?php echo $attr; ?>">
+                        <?php if($key == 'id' || $key == 'portal_id'){ ?>
+                            <input type="hidden" name="<?php echo $key; ?>" value="<?php echo $attr; ?>">
+                        <?php }else{ ?>
+                            <div class="col-xs-12 form-group">
+                                <label for="<?php echo $key; ?>" class="col-sm-3 control-label" ><?php echo $key; ?></label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control" name="<?php echo $key; ?>" id="<?php echo $key; ?>" value="<?php echo $attr; ?>">
+                                </div>
                             </div>
-                        </div>
+                        <?php } ?>
                     <?php } ?>
                 </form>
             </div>
@@ -61,13 +67,37 @@
             <div class="row">
                 <?php foreach($portals as $key => $portal){ ?>
                     <div class="col-xs-12 col-sm-4 col-md-2">
-                        <a class="portal" href="<?php echo base_url("admin/main?portal=".$portal->name); ?>">
+                        <a class="portal" href="<?php echo base_url("admin/main?portal=".$portal->id); ?>">
                             <div class="portal">
                                 <img class="portalImg" src="<?php echo $portal->logo; ?>" >
                             </div>
                         </a>
                     </div>
                 <?php } ?>
+                <?php foreach($crons as $key => $cron){ ?>
+                    <div class="col-xs-12 col-sm-4 col-md-2">
+                        <a class="cron" href="<?php echo base_url("admin/main?cron=".$cron->id); ?>">
+                            <div class="cron">
+                                <i class="fa fa-clock-o" aria-hidden="true"></i>
+                                <p><?php echo $cron->title; ?></p>
+                            </div>
+                        </a>
+                    </div>
+                <?php } ?>
+                <div class="col-xs-12 col-sm-4 col-md-2">
+                    <div id="addTemplate" class="addMain">
+                        <i class="fa fa-plus" aria-hidden="true"></i>
+                        <p>Add</p>
+                        <p>Template</p>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-4 col-md-2">
+                    <div id="addCron" class="addMain">
+                        <i class="fa fa-plus" aria-hidden="true"></i>
+                        <p>Add</p>
+                        <p>Cron</p>
+                    </div>
+                </div>
             </div>
         </section>
     <?php } ?>
@@ -76,7 +106,26 @@
 <script type="text/javascript">
     $(document).ready(function(){
         $("#portal input").change(function(){
-            $.post("<?php echo base_url('admin/main'); ?>", $('#portal').serialize())
+            $.ajax({
+                method: "POST",
+                url: "<?php echo base_url('admin/main'); ?>",
+                data: $('#portal').serialize(),
+                success: function(data) {
+                    if(data) {
+                        var data = JSON.parse(data);
+                        if (data.error) {
+                            alert(data.error.msg);
+                            throw data.error.msg;
+                        }
+                    }
+                }
+            });
+        });
+        $("#addTemplate").click(function(){
+            $.post("<?php echo base_url('admin/main'); ?>", {add: "template"})
+        });
+        $("#addCron").click(function(){
+            $.post("<?php echo base_url('admin/main'); ?>", {add: "cron"})
         });
     });
 </script>

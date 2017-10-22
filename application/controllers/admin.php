@@ -8,62 +8,53 @@ class Admin extends CI_Controller
     {
         if($this->session->userdata('is_logged_in') && $this->session->userdata('role_id') == 1)
         {
-
             $this->load->model("templateModel");
+            $this->load->model("cronModel");
+
             if(isset($_POST) && !empty($_POST)){
-                $this->templateModel->updateTemplate($_POST);
-                $portalData = array("id" => $_POST["portal_id"], "name" => $_POST["name"], "logo" => $_POST["logo"], "archive" => $_POST["archive"]);
-                $this->templateModel->updatePortal($portalData);
-                die();
+
+                if(isset($_POST["add"]) && $_POST["add"] == "template"){
+
+                }
+                elseif(isset($_POST["add"]) && $_POST["add"] == "cron"){
+                    $this->cronModel->addNewCron();
+                }
+                elseif(isset($_POST["portal_id"])){
+                    $this->checkPortal($_POST);
+                }
+                elseif(isset($_POST["minute"])){
+                    $this->checkCron($_POST);
+                }
             }
 
-            $portals = $this->templateModel->getAllPortals();
+
+
+
+            $crons = $this->cronModel->getCrons();
+            $portals = $this->templateModel->getPortals();
 
             $portal = isset($_GET["portal"]) ? $_GET["portal"] : '';
+            $cron = isset($_GET["cron"]) ? $_GET["cron"] : '';
 
-            if(!empty($portal)){
-                if($portal == "cron"){
-                    $this->load->model("cronModel");
-                    $cron = $this->cronModel->getCron();
-                    $data = array(
-                        'cron' => $cron,
-                    );
-                    $this->load->view("header");
-                    $this->load->view("adminSideBar");
-                    $this->load->view("main", $data);
-                    $this->load->view("footer");
-                }
-                elseif(isset($portals[$portal])){
-                    $template = $this->templateModel->getActiveTemplateById($portals[$portal]->id);
-                    $data = array(
-                        'template' => isset($template) ? $template : array(),
-                        'portal' => $portals[$portal],
-                    );
-                    $this->load->view("header");
-                    $this->load->view("adminSideBar");
-                    $this->load->view("main", $data);
-                    $this->load->view("footer");
-                }
-                else{
-                    $data = array(
-                        'error' => "Wrong data is given",
-                        'portals' => $portals,
-                    );
-                    $this->load->view("header");
-                    $this->load->view("adminSideBar");
-                    $this->load->view("main", $data);
-                    $this->load->view("footer");
-                }
+            $data = array();
+
+            if( !empty($cron) && $crons[$cron]){
+                $data['cron'] = $crons[$cron];
+            }
+            elseif(!empty($portal) && isset($portals[$portal])){
+                $template = $this->templateModel->getActiveTemplateById($portals[$portal]->id);
+                $data['template'] = isset($template) ? $template : array();
+                $data['portal'] = $portals[$portal];
             }
             else{
-                $data = array(
-                    'portals' => $portals,
-                );
-                $this->load->view("header");
-                $this->load->view("adminSideBar");
-                $this->load->view("main", $data);
-                $this->load->view("footer");
+                $data['crons'] = $crons;
+                $data['portals'] = $portals;
             }
+
+            $this->load->view("header");
+            $this->load->view("adminSideBar");
+            $this->load->view("main", $data);
+            $this->load->view("footer");
         }
         else{
             redirect('user/login');
@@ -128,4 +119,46 @@ class Admin extends CI_Controller
             redirect('user/login');
         }
     }
+
+    private function checkPortal($data)
+    {
+        $this->load->model("templateModel");
+        try {
+            if(is_numeric($data["id"]) && is_numeric($data["portal_id"]) && is_numeric($data["status"]) && is_numeric($data["category_id"])) {
+                $portalData = array("id" => $data["portal_id"], "name" => $data["name"], "logo" => $data["logo"], "archive" => $data["archive"]);
+                $this->templateModel->updatePortal($portalData);
+                $this->templateModel->updateTemplate($data);
+            }
+            else {
+                if(!is_numeric($data["id"])){
+                    throw new Exception('Template id must be numeric, last changes are not saved');
+                }
+                else if(!is_numeric($data["portal_id"])){
+                    throw new Exception('Portal id must be numeric, last changes are not saved');
+                }
+                else if(!is_numeric($data["status"])){
+                    throw new Exception('Template status must be numeric, last changes are not saved');
+                }
+                else if(!is_numeric($data["category_id"])){
+                    throw new Exception('Category id must be numeric, last changes are not saved');
+                }
+            }
+        }
+        catch (Exception $e) {
+            echo json_encode(array(
+                'error' => array(
+                    'msg' => $e->getMessage(),
+                ),
+            ));
+        }
+        die();
+    }
+
+    private function checkCron($data)
+    {
+
+        die();
+    }
+
+
 } 
