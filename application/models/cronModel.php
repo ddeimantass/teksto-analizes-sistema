@@ -6,7 +6,10 @@ class CronModel extends CI_Model
     public function addNewCron() {
         $crons = $this->getCrons();
         $id = end($crons)->id;
-        $this->db->insert('cron', array('id' => ($id+1)));
+        $this->db->insert('cron', array('id' => ($id+1), 'title' => 'New cron job'));
+    }
+    public function deleteCron($id) {
+        $this->db->delete('cron', array('id' => $id));
     }
 	public function getCrons()
     {

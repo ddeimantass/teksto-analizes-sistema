@@ -1,10 +1,22 @@
 <aside class="main-sidebar">
     <section class="sidebar">
         <ul class="sidebar-menu">
-            <li class="<?php echo base_url(uri_string()) == base_url()."admin/main" ? "active " : "" ;?>">
-                <a href="<?php echo base_url()."admin/main";?>">
-                    <i class="fa fa-info"></i>
-                    <span>Main</span>
+            <li class="<?php echo base_url(uri_string()) == base_url()."admin/portals" ? "active " : "" ;?>">
+                <a href="<?php echo base_url()."admin/portals";?>">
+                    <i class="fa fa-pencil-square-o"></i>
+                    <span>Portals settings</span>
+                </a>
+            </li>
+            <li class="<?php echo base_url(uri_string()) == base_url()."admin/templates" ? "active " : "" ;?>">
+                <a href="<?php echo base_url()."admin/templates";?>">
+                    <i class="fa fa-file-code-o"></i>
+                    <span>Templates settings</span>
+                </a>
+            </li>
+            <li class="<?php echo base_url(uri_string()) == base_url()."admin/cron" ? "active " : "" ;?>">
+                <a href="<?php echo base_url()."admin/cron";?>">
+                    <i class="fa fa-clock-o"></i>
+                    <span>Cron settings</span>
                 </a>
             </li>
             <li class="<?php echo base_url(uri_string()) == base_url()."admin/users" ? "active " : "" ;?>">

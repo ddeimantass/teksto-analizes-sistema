@@ -11,13 +11,19 @@
     <link rel="stylesheet" href="<?php echo base_url();?>dist/css/AdminLTE.min.css">
     <link rel="stylesheet" href="<?php echo base_url();?>plugins/datatables/dataTables.bootstrap.css">
     <link rel="stylesheet" href="<?php echo base_url();?>dist/css/skins/skin-blue.min.css">
-    <link rel="stylesheet" href="<?php echo base_url();?>styles.css">
+    <link rel="stylesheet" href="<?php echo base_url();?>css/styles.css">
     <!--[if lt IE 9]>
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
     <script src="<?php echo base_url();?>plugins/jQuery/jquery-2.2.3.min.js"></script>
-    <script src="<?php echo base_url();?>functions.js"></script>
+    <script src="<?php echo base_url();?>bootstrap/js/bootstrap.min.js"></script>
+    <script src="<?php echo base_url();?>js/functions.js"></script>
+    <script>
+        $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
 </head>
 <body class="hold-transition skin-blue fixed sidebar-collapse sidebar-mini">
 <div class="wrapper">
@@ -33,21 +39,21 @@
             <div class="navbar-custom-menu">
                 <ul class="nav navbar-nav">
                     <?php if($this->session->userdata('role_id') == 1){
-                        echo '<li class="user">';
+                        echo '<li class="switch" data-toggle="tooltip" title="switch view" data-placement="bottom">';
                         if (strpos(base_url(uri_string()), 'admin') !== false) {
                             echo '<a href="'.base_url('site/news').'" ><i class="fa fa-exchange" aria-hidden="true"></i></a>';
                         }
                         else{
-                            echo '<a href="'.base_url("admin/main").'" ><i class="fa fa-exchange" aria-hidden="true"></i></a>';
+                            echo '<a href="'.base_url("admin/portals").'" ><i class="fa fa-exchange" aria-hidden="true"></i></a>';
                         }
                         echo "</li>";
                     } ?>
-                    <li class="user">
+                    <li class="user" data-toggle="tooltip" title="profile" data-placement="bottom">
                         <a href="<?php echo base_url("user/change"); ?>">
                             <i class="fa fa-user"></i> <?php echo $this->session->userdata('name'); ?>
                         </a>
                     </li>
-                    <li class="logout">
+                    <li class="logout" data-toggle="tooltip" title="logout" data-placement="bottom">
                         <a href="<?php echo base_url("user/logout"); ?>">
                             <i class="fa fa-times"></i>
                         </a>

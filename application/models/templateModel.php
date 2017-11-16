@@ -3,9 +3,16 @@
 class TemplateModel extends CI_Model {
 
     public function addNewTemplate() {
-        $templates = $this->getAllTemplates();
-        $id = end($templates)->id;
-        $this->db->insert('template', array('id' => ($id+1)));
+        $this->db->insert('template', array('portal_id' => $this->getPortalByName("new")->id));
+    }
+    public function addPortal() {
+        $this->db->insert('portal', array('name' => 'Unknown portal'));
+    }
+    public function deleteTemplate($id) {
+        $this->db->delete('template', array('id' => $id));
+    }
+    public function deletePortal($id) {
+        $this->db->delete('portal', array('id' => $id));
     }
 
 	public function getAllTemplates() {
@@ -17,6 +24,15 @@ class TemplateModel extends CI_Model {
         }
         return $templates;
 	}
+    public function getTemplateIdByPortal(){
+        $query = $this->db->get('template');
+        $templates = array();
+        foreach ($query->result() as $row)
+        {
+            $templates[$row->portal_id] = $row;
+        }
+        return $templates;
+    }
     public function updateTemplate($data) {
         $this->load->library('form_validation');
         foreach($data as $key => $value){
@@ -42,7 +58,7 @@ class TemplateModel extends CI_Model {
         }
     }
 
-    public function getActiveTemplateById($id) {
+    public function getActiveTemplateByPortalId($id) {
         $this->db->where('portal_id',$id);
         $this->db->where('status',1);
         $query = $this->db->get('template');
@@ -77,8 +93,8 @@ class TemplateModel extends CI_Model {
             return $row;
         }
     }
-    public function getDelfiTemplate() {
-        $query = $this->db->query('SELECT template.* FROM template LEFT JOIN portal ON portal.id = template.portal_id WHERE portal.name = "delfi"');
+    public function getTemplateByPortal($portal) {
+        $query = $this->db->query('SELECT template.* FROM template LEFT JOIN portal ON portal.id = template.portal_id WHERE portal.id = '. $portal);
         foreach ($query->result() as $row)
         {
             return $row;
@@ -87,11 +103,12 @@ class TemplateModel extends CI_Model {
     public function saveComments($comments){
         $DBcomments = $this->getComments();
         foreach($comments as $id => $comment){
-            if(!isset($DBcomments[$id])) {
-                $this->db->insert('comment', $comments[$id]);
-            }
-            else if(!isset($DBcomments[$id]->content)){
-                $this->db->replace('comment', $comments[$id]);
+            if(isset($comment["content"])) {
+                if (isset($DBcomments[$id])) {
+                    $this->db->replace('comment', $comments[$id], array('id' => $comments[$id]["id"], 'portal_id' => $comments[$id]["portal_id"]));
+                } else {
+                    $this->db->insert('comment', $comments[$id]);
+                }
             }
         }
     }
@@ -114,18 +131,20 @@ class TemplateModel extends CI_Model {
         $sources = $this->getSources();
         $DBarticles = $this->getArticles();
         foreach($articles as $id => $article){
-            $articles[$id]["author_id"] = isset($articles[$id]["author"]) ? $authors[$articles[$id]["author"]] : null;
-            unset($articles[$id]["author"]);
-            $articles[$id]["source_id"] = isset($articles[$id]["source"]) ? $sources[$articles[$id]["source"]] : null;
-            unset($articles[$id]["source"]);
-            $articles[$id]["category_id"] = $categories[$articles[$id]["category"]];
-            unset($articles[$id]["category"]);
+            if(isset($article["summary"])) {
+                $articles[$id]["author_id"] = isset($articles[$id]["author"]) ? $authors[$articles[$id]["author"]] : null;
+                unset($articles[$id]["author"]);
+                $articles[$id]["source_id"] = isset($articles[$id]["source"]) ? $sources[$articles[$id]["source"]] : null;
+                unset($articles[$id]["source"]);
+                $articles[$id]["category_id"] = $categories[$articles[$id]["category"]];
+                unset($articles[$id]["category"]);
 
-            if(!isset($DBarticles[$id])) {
-                $this->db->insert('article', $articles[$id]);
-            }
-            else if(!isset($DBarticles[$id]->content)){
-                $this->db->replace('article', $articles[$id]);
+
+                if (isset($DBarticles[$id])) {
+                    $this->db->replace('article', $articles[$id], array('id' => $articles[$id]["id"], 'portal_id' => $articles[$id]["portal_id"]));
+                } else {
+                    $this->db->insert('article', $articles[$id]);
+                }
             }
         }
     }

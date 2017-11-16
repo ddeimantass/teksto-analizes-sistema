@@ -31,7 +31,7 @@ class User extends CI_Controller {
                 $this->session->set_userdata($data);
                 session_write_close();
                 if($this->userModel->is_admin()) {
-                    redirect('admin/main');
+                    redirect('admin/portals');
                 }
                 else{
                     redirect('site/news');
