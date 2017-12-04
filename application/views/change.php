@@ -1,6 +1,6 @@
 <div class="content-wrapper">
     <section class="content-header">
-        <h1>Users</h1>
+        <h1><?php echo isset($name) ? $name : "Profile" ;?></h1>
     </section>
     <section class="content">
         <div id="change" class="change-box-body">

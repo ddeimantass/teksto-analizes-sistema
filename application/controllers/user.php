@@ -15,6 +15,7 @@ class User extends CI_Controller {
         $this->form_validation->set_message("valid_email", 'Wrong email');
 
         if($this->form_validation->run()){
+
             if($this->userModel->isDeleted() === true){
                 $data['prierr']= "The user does not exist";
                 $this->load->view("logHeader");
@@ -64,6 +65,7 @@ class User extends CI_Controller {
             $this->form_validation->set_message('required', '%s field is required');
             $this->form_validation->set_message('max_length', '%s maximum symbols count is %s');
             $this->form_validation->set_message("matches", 'New passwords mismatch');
+            $data['name'] = $this->session->userdata('name');
 
             if ($this->form_validation->run()) {
                 $this->userModel->updatePassword();
@@ -79,6 +81,9 @@ class User extends CI_Controller {
                 $this->load->view("change", $data);
                 $this->load->view("footer");
             }
+        }
+        else{
+            redirect('user/login');
         }
 
     }
@@ -114,6 +119,7 @@ class User extends CI_Controller {
     }
     public function forgot() {
 
+        $this->load->model('CRUD_model');
 
         $this->load->library('form_validation');
         $this->form_validation->set_rules('email','Email','required|trim|max_length[50]|valid_email[user.email]|callback_validate_unique');

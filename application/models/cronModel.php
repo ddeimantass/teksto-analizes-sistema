@@ -4,9 +4,7 @@ class CronModel extends CI_Model
 {
 
     public function addNewCron() {
-        $crons = $this->getCrons();
-        $id = end($crons)->id;
-        $this->db->insert('cron', array('id' => ($id+1), 'title' => 'New cron job'));
+        $this->db->insert('cron', array('status' => '0'));
     }
     public function deleteCron($id) {
         $this->db->delete('cron', array('id' => $id));
@@ -22,9 +20,16 @@ class CronModel extends CI_Model
         return $crons;
 	}
 
-    public function saveCron($cron)
-    {
-        $this->db->replace('cron', $cron);
+
+    public function updateCron($data) {
+        $this->load->library('form_validation');
+//        foreach($data as $key => $value){
+//            $this->form_validation->set_rules($key, $key,'trim|xss_clean');
+//        }
+
+//        if($this->form_validation->run()){
+            $this->db->replace('cron', $data);
+//        }
     }
 
 }

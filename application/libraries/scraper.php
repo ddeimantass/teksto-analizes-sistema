@@ -5,16 +5,17 @@ class Scraper
 {
     protected $CI, $portal, $template, $date, $min, $max;
 
-    function initialize($portal, $min = 10, $max = 25, $date = ""){
+    function initialize($portal_id, $min = 10, $max = 25, $date = ""){
         ini_set('max_execution_time', 0);
         date_default_timezone_set('Europe/Vilnius');
         include APPPATH . 'third_party/simple_html_dom.php';
         $this->CI =& get_instance();
         $this->CI->load->model("templateModel");
+        $this->CI->load->model("logModel");
         $this->min = $min;
         $this->max = $max;
         $this->date = $date;
-        $this->portal = $this->CI->templateModel->getPortalByName($portal);
+        $this->portal = $this->CI->templateModel->getPortal($portal_id);
         $this->template = $this->CI->templateModel->getTemplateByPortal($this->portal->id);
         $this->archive();
     }
@@ -92,8 +93,9 @@ class Scraper
         $today = new DateTime(date("Y-m-d"));
 
         foreach ($articles as $id => $article_attr) {
-            //$article_html = file_get_html($article_attr["link"]);
-            $article_html = file_get_html("https://www.15min.lt/naujiena/aktualu/lietuva/28-ios-pacientu-organizacijos-isreiske-palaikyma-lietuvos-mediku-sajudziui-56-880900");
+            ini_set('max_execution_time', 900);
+            ini_set('default_socket_timeout', 300);
+            $article_html = file_get_html($article_attr["link"]);
 
             if(isset($this->template->article_author) && !empty($this->template->article_author)){
                 $author = $article_html->find($this->template->article_author, 0);
@@ -130,7 +132,12 @@ class Scraper
             $delay =  rand( $this->min, $this->max);
             sleep($delay);
         }
+
         $this->CI->templateModel->saveArticles($articles);
+        $this->CI->logModel->newLog("Saved articles", count($articles). " articles were successfully saved");
+        $this->CI->logModel->newLog("delay", $delay);
+        $this->CI->logModel->newLog("delay", serialize($articles));
+
     }
 
     public function comments($article, $reg = "")
@@ -138,6 +145,8 @@ class Scraper
         $comments = array();
         $counter = 0;
         do {
+            ini_set('max_execution_time', 900);
+            ini_set('default_socket_timeout', 300);
             if(strpos($article['link'], "?")){
                 $comment_html = file_get_html($article['link'] . $reg . "&com=1&s=2&no=" . $counter);
             }
@@ -157,9 +166,12 @@ class Scraper
                         $comments[$id]["article_id"] = $article['id'];
                         $comments[$id]["portal_id"] = $article['portal_id'];
                         $dateIP = explode("IP:", $comment->find($this->template->comment_date, 0)->plaintext);
-                        $d = DateTime::createFromFormat('Y-m-d H:i', trim($dateIP[0]));
-                        $comments[$id]["date"] = $d->format('Y-m-d H:i:s');
-                        $comments[$id]["ip"] = isset($dateIP[1]) ? trim($dateIP[1]) : '';
+                        if(isset($dateIP)){
+                            $d = DateTime::createFromFormat('Y-m-d H:i', trim($dateIP[0]));
+                            $comments[$id]["date"] = $d->format('Y-m-d H:i:s');
+                            $comments[$id]["ip"] = isset($dateIP[1]) ? trim($dateIP[1]) : '';
+                        }
+
                         $likes = $comment->find($this->template->comment_likes, 0);
                         $comments[$id]["likes"] = isset($likes->plaintext) ? $likes->plaintext : 0;
                         $dislikes = $comment->find($this->template->comment_dislikes, 0);
@@ -198,6 +210,7 @@ class Scraper
         } while ($counter % 20 == 0 && $counter != 0);
         if(!empty($comments)) {
             $this->CI->templateModel->saveComments($comments);
+            $this->CI->logModel->newLog("Saved comments", count($comments). " comments were successfully saved");
         }
     }
 

@@ -93,6 +93,14 @@ class TemplateModel extends CI_Model {
             return $row;
         }
     }
+    public function getPortal($id) {
+        $this->db->where('id', $id);
+        $query = $this->db->get('portal');
+        foreach ($query->result() as $row)
+        {
+            return $row;
+        }
+    }
     public function getTemplateByPortal($portal) {
         $query = $this->db->query('SELECT template.* FROM template LEFT JOIN portal ON portal.id = template.portal_id WHERE portal.id = '. $portal);
         foreach ($query->result() as $row)
