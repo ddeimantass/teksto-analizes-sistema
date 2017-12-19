@@ -117,4 +117,10 @@ class UserModel extends CI_Model {
         }
         return null;
     }
+    public function deletedUser($data)
+    {
+        $this->db->set('deleted', $data["deleted"]);
+        $this->db->where('id',$data["id"]);
+        $this->db->update('user');
+    }
 }

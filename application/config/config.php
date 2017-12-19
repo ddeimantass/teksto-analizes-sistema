@@ -24,6 +24,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 $config['base_url'] = 'http://localhost:8888/MultiMediaLT';
+// $config['base_url'] = 'http://193.219.91.103:7196';
 
 /*
 |--------------------------------------------------------------------------

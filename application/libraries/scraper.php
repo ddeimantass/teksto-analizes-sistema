@@ -91,7 +91,7 @@ class Scraper
     {
 
         $today = new DateTime(date("Y-m-d"));
-
+        $allIds = "";
         foreach ($articles as $id => $article_attr) {
             ini_set('max_execution_time', 900);
             ini_set('default_socket_timeout', 300);
@@ -129,14 +129,18 @@ class Scraper
                 }
 
             }
+            $allIds .= $id." ";
             $delay =  rand( $this->min, $this->max);
             sleep($delay);
         }
 
         $this->CI->templateModel->saveArticles($articles);
-        $this->CI->logModel->newLog("Saved articles", count($articles). " articles were successfully saved");
-        $this->CI->logModel->newLog("delay", $delay);
-        $this->CI->logModel->newLog("delay", serialize($articles));
+        //$this->CI->logModel->newLog("Saved articles", count($articles). " articles were successfully saved");
+
+        foreach($articles as $key => $value){
+
+        }
+        $this->CI->logModel->newLog($allIds);
 
     }
 

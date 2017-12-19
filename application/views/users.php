@@ -18,15 +18,20 @@
                                     <th>Email</th>
                                     <th>Role</th>
                                     <th>Date</th>
+                                    <th>Active</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach($users as $key => $user){
-                                    echo "<tr><td>".$user->id."</td>";
+                                    echo "<tr><td class='id'>".$user->id."</td>";
                                     echo "<td>".$user->name."</td>";
                                     echo "<td>".$user->email."</td>";
                                     echo "<td>".$roles[$user->role_id]."</td>";
-                                    echo "<td>".$user->date."</td></tr>";
+                                    echo "<td>".$user->date."</td>";
+                                    echo "<td>";
+                                    echo '<input type="hidden" name="deleted" value="'.$user->deleted.'">';
+                                    echo $user->deleted == 1 ? '<i class="fa fa-toggle-off" aria-hidden="true"></i>' : '<i class="fa fa-toggle-on" aria-hidden="true"></i>';
+                                    echo "</td></tr>";
                                 } ?>
                             </tbody>
                         </table>
@@ -39,5 +44,24 @@
 <script>
     $(document).ready(function(){
         $('#users').DataTable();
+
+
+        $(".fa-toggle-off, .fa-toggle-on").click(function(){
+            $(this).toggleClass("fa-toggle-off");
+            $(this).toggleClass("fa-toggle-on");
+            if($(this).hasClass("fa-toggle-off")){
+                $(this).siblings("input").val("1");
+            }
+            else{
+                $(this).siblings("input").val("0");
+            }
+            $.ajax({
+                method: "POST",
+                url: "<?php echo base_url('admin/users'); ?>",
+                data: { deleted: $(this).parents("tr").find("input[name='deleted']").val(), id: $(this).parents("tr").find(".id").text()}
+            });
+        });
+
+
     });
 </script>

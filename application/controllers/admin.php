@@ -147,7 +147,13 @@ class Admin extends CI_Controller
     public function users()
     {
         if($this->session->userdata('is_logged_in') && $this->session->userdata('role_id') == 1){
+
             $this->load->model("userModel");
+
+            if(isset($_POST["deleted"]) ){
+                $this->userModel->deletedUser($_POST);
+            }
+
             $data = array(
                 'roles' => $this->userModel->getAllRoles(),
                 'users' => $this->userModel->getUsers(),
